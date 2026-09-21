@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="中文文章責編 Skill 的使用流程圖與白話說明。">
+  <title>中文文章責編 Skill 怎麼工作</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #ffffff;
+      --surface: #ffffff;
+      --surface-soft: #f2f7f4;
+      --ink: #18302c;
+      --muted: #62736f;
+      --line: #d5dfdb;
+      --accent: #137c68;
+      --accent-deep: #0c5b4d;
+      --accent-soft: #dceee8;
+      --warm: #c8753d;
+      --shadow: 0 18px 48px rgba(18, 56, 47, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.75;
+    }
+
+    a { color: var(--accent-deep); }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
+      gap: 48px;
+      align-items: end;
+      margin-bottom: 36px;
+    }
+
+    h3, h4, h5, p { margin-top: 0; }
+
+    h3 {
+      max-width: 760px;
+      margin-bottom: 14px;
+      font-size: clamp(1.85rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.25;
+    }
+
+    .lead {
+      max-width: 680px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .start-note {
+      padding: 18px 20px;
+      border-left: 3px solid var(--warm);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .start-note small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .start-note p {
+      margin-bottom: 0;
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .diagram-shell {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .section-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h4 {
+      margin-bottom: 0;
+      font-size: 1.02rem;
+      letter-spacing: 0.01em;
+    }
+
+    .section-bar span {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .diagram-wrap {
+      padding: 22px 18px 16px;
+    }
+
+    .flow-diagram {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .mobile-flow {
+      display: none;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .mobile-flow li {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 12px;
+      padding: 14px 12px;
+      border-left: 3px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .mobile-flow li + li { margin-top: 8px; }
+    .mobile-flow li:first-child { border-left-color: var(--accent); }
+    .mobile-flow li:last-child { border-left-color: var(--ink); }
+
+    .mobile-flow b {
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+    }
+
+    .mobile-flow span {
+      color: var(--muted);
+      font-size: 0.87rem;
+    }
+
+    .mobile-flow strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--ink);
+      font-size: 0.94rem;
+    }
+
+    .flow-diagram .connector {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .flow-diagram .connector.optional {
+      stroke: var(--warm);
+      stroke-dasharray: 8 10;
+    }
+
+    .flow-diagram .node-box {
+      fill: var(--surface);
+      stroke: var(--line);
+      stroke-width: 2;
+    }
+
+    .flow-diagram .node-box.highlight {
+      fill: var(--accent-soft);
+      stroke: var(--accent);
+    }
+
+    .flow-diagram .node-box.confirm {
+      fill: var(--ink);
+      stroke: var(--ink);
+    }
+
+    .flow-diagram .node-number {
+      fill: var(--accent);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .flow-diagram .node-title {
+      fill: var(--ink);
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .flow-diagram .node-copy {
+      fill: var(--muted);
+      font-size: 13px;
+    }
+
+    .flow-diagram .confirm .node-number,
+    .flow-diagram .confirm .node-title,
+    .flow-diagram .confirm .node-copy { fill: var(--surface); }
+
+    .diagram-caption {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    .three-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0 44px;
+    }
+
+    .plain-block {
+      padding: 20px;
+      border-top: 2px solid var(--accent);
+      background: var(--surface);
+    }
+
+    .plain-block:nth-child(2) { border-top-color: var(--warm); }
+    .plain-block:nth-child(3) { border-top-color: var(--ink); }
+
+    h5 {
+      margin-bottom: 8px;
+      font-size: 0.98rem;
+    }
+
+    .plain-block p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .detail-section {
+      display: grid;
+      grid-template-columns: 0.7fr 1.3fr;
+      gap: 48px;
+      padding: 34px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .detail-section:last-of-type { border-bottom: 1px solid var(--line); }
+
+    .detail-section > h4 {
+      color: var(--accent-deep);
+      font-size: 1.2rem;
+    }
+
+    .detail-section > div > p:last-child { margin-bottom: 0; }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .architecture li {
+      min-height: 142px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .architecture b {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--accent);
+      font-size: 1.25rem;
+    }
+
+    .architecture span {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .quote {
+      margin: 0;
+      padding: 22px 24px;
+      border-left: 3px solid var(--warm);
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 1.06rem;
+      font-weight: 700;
+    }
+
+    footer {
+      padding-top: 28px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 780px) {
+      .page { width: min(100% - 28px, 620px); padding-top: 30px; }
+      .intro, .detail-section { grid-template-columns: 1fr; gap: 20px; }
+      .intro { margin-bottom: 26px; }
+      .three-columns { grid-template-columns: 1fr; }
+      .architecture { grid-template-columns: repeat(2, 1fr); }
+      .section-bar { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .diagram-wrap { padding: 14px 12px 10px; }
+      .flow-diagram { display: none; }
+      .mobile-flow { display: block; }
+    }
+
+    @media (max-width: 430px) {
+      h3 { font-size: 1.8rem; }
+      .architecture { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="intro">
+      <div>
+        <p class="eyebrow">Chinese Writing Editor</p>
+        <h3>中文文章責編 Skill 怎麼工作</h3>
+        <p class="lead">你不用先寫完整文章。先丟一件事、一個畫面，或一句還沒整理好的想法，Skill 會陪你把它整理成文章。</p>
+      </div>
+      <aside class="start-note" aria-label="開始使用方式">
+        <small>啟用 Skill 之後</small>
+        <p>先回答一個問題，再一題一題往下整理。</p>
+      </aside>
+    </header>
+
+    <section class="diagram-shell" aria-labelledby="flow-title">
+      <div class="section-bar">
+        <h4 id="flow-title">一條完整的寫作路徑</h4>
+        <span>從零散想法走到作者確認</span>
+      </div>
+      <div class="diagram-wrap">
+        <svg class="flow-diagram" viewBox="0 0 1100 520" role="img" aria-labelledby="diagram-title diagram-description">
+          <title id="diagram-title">中文文章責編 Skill 七個階段的流程圖</title>
+          <desc id="diagram-description">Skill 先詢問作者想寫什麼，再透過逐題訪談聚焦內容，使用破例感觀架構，必要時補充資料，整理成大綱與段落，最後由作者確認。</desc>
+
+          <path class="connector" d="M274 112 H314" />
+          <path class="connector" d="M544 112 H584" />
+          <path class="connector" d="M814 112 H854" />
+          <path class="connector" d="M969 192 V262 H179 V318" />
+          <path class="connector optional" d="M294 378 H394" />
+          <path class="connector" d="M624 378 H724" />
+
+          <g class="flow-node">
+            <rect class="node-box highlight" x="44" y="42" width="230" height="140" rx="14" />
+            <text class="node-number" x="66" y="73">01 / 啟用</text>
+            <text class="node-title" x="66" y="105">先問你想寫什麼</text>
+            <text class="node-copy" x="66" y="132">事件、畫面或一句想法</text>
+            <text class="node-copy" x="66" y="154">都可以直接丟進來</text>
+          </g>
+
+          <g class="flow-node">
+            <rect class="node-box" x="314" y="42" width="230" height="140" rx="14" />
+            <text class="node-number" x="336" y="73">02 / 接住</text>
+            <text class="node-title" x="336" y="105">先抓住真正想寫的事</text>
+            <text class="node-copy" x="336" y="132">不急著改句子</text>
+            <text class="node-copy" x="336" y="154">先確認文章要處理什麼</text>
+          </g>
+
+          <g class="flow-node">
+            <rect class="node-box" x="584" y="42" width="230" height="140" rx="14" />
+            <text class="node-number" x="606" y="73">03 / 訪談</text>
+            <text class="node-title" x="606" y="105">一題一題問下去</text>
+            <text class="node-copy" x="606" y="132">畫面、停頓、感受</text>
+            <text class="node-copy" x="606" y="154">觀點與讀者會帶走什麼</text>
+          </g>
+
+          <g class="flow-node">
+            <rect class="node-box highlight" x="854" y="42" width="230" height="140" rx="14" />
+            <text class="node-number" x="876" y="73">04 / 組織</text>
+            <text class="node-title" x="876" y="105">用破例感觀整理</text>
+            <text class="node-copy" x="876" y="132">這是文章架構</text>
+            <text class="node-copy" x="876" y="154">不是固定文體或模板</text>
+          </g>
+
+          <g class="flow-node">
+            <rect class="node-box" x="64" y="308" width="230" height="140" rx="14" />
+            <text class="node-number" x="86" y="339">05 / 補充</text>
+            <text class="node-title" x="86" y="371">必要時再找資料</text>
+            <text class="node-copy" x="86" y="398">先有清楚觀點</text>
+            <text class="node-copy" x="86" y="420">再補事實與例子</text>
+          </g>
+
+          <g class="flow-node">
+            <rect class="node-box" x="394" y="308" width="230" height="140" rx="14" />
+            <text class="node-number" x="416" y="339">06 / 成稿</text>
+            <text class="node-title" x="416" y="371">先排順序，再寫段落</text>
+            <text class="node-copy" x="416" y="398">每一段都有自己的任務</text>
+            <text class="node-copy" x="416" y="420">作者語氣保留在文章裡</text>
+          </g>
+
+          <g class="flow-node confirm">
+            <rect class="node-box confirm" x="724" y="308" width="230" height="140" rx="14" />
+            <text class="node-number" x="746" y="339">07 / 交付</text>
+            <text class="node-title" x="746" y="371">由作者最後確認</text>
+            <text class="node-copy" x="746" y="398">要不要保留、怎麼修改</text>
+            <text class="node-copy" x="746" y="420">決定權一直在作者手上</text>
+          </g>
+        </svg>
+        <ol class="mobile-flow" aria-label="手機版七個寫作階段">
+          <li><b>01 / 啟用</b><span><strong>先問你想寫什麼</strong>事件、畫面或一句想法都可以直接丟進來。</span></li>
+          <li><b>02 / 接住</b><span><strong>先抓住真正想寫的事</strong>不急著改句子，先確認文章要處理什麼。</span></li>
+          <li><b>03 / 訪談</b><span><strong>一題一題問下去</strong>整理畫面、停頓、感受、觀點與讀者會帶走什麼。</span></li>
+          <li><b>04 / 組織</b><span><strong>用破例感觀整理</strong>這是文章架構，不是固定文體或模板。</span></li>
+          <li><b>05 / 補充</b><span><strong>必要時再找資料</strong>先有清楚觀點，再補事實與例子。</span></li>
+          <li><b>06 / 成稿</b><span><strong>先排順序，再寫段落</strong>每一段都有自己的任務，作者語氣保留在文章裡。</span></li>
+          <li><b>07 / 交付</b><span><strong>由作者最後確認</strong>要不要保留、怎麼修改，決定權一直在作者手上。</span></li>
+        </ol>
+        <p class="diagram-caption">橘色虛線代表可選的資料補充，不是每篇文章都需要查資料。</p>
+      </div>
+    </section>
+
+    <section class="three-columns" aria-label="使用時的分工">
+      <article class="plain-block">
+        <h5>你要提供</h5>
+        <p>一件事、一個場景、一種感覺，或一句還沒想清楚的話。</p>
+      </article>
+      <article class="plain-block">
+        <h5>Skill 會協助</h5>
+        <p>用一題一題的訪談，把內容、觀點和文章順序整理出來。</p>
+      </article>
+      <article class="plain-block">
+        <h5>你保留決定權</h5>
+        <p>每一段都可以改、刪、重排，最後由你確認能不能交付。</p>
+      </article>
+    </section>
+
+    <section class="detail-section" aria-labelledby="architecture-title">
+      <h4 id="architecture-title">破例感觀是什麼</h4>
+      <div>
+        <p>它是整理文章的四種材料。每篇文章不必四種都有，也不必照固定順序排列。</p>
+        <ul class="architecture">
+          <li><b>破</b><span>先讓讀者知道發生了什麼，或哪裡不對勁。</span></li>
+          <li><b>例</b><span>用具體事件、畫面或例子，讓讀者看見內容。</span></li>
+          <li><b>感</b><span>留下當下的感受、停頓和身體反應。</span></li>
+          <li><b>觀</b><span>說清楚你的看法，以及讀者能帶走什麼。</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="detail-section" aria-labelledby="start-title">
+      <h4 id="start-title">開始時只要說這句</h4>
+      <div>
+        <p class="quote">你這次想寫哪一件事？可以只丟一個事件、一個畫面，或一句還沒整理好的想法。</p>
+        <p>不用先想標題，也不用先把文章寫完。Skill 會從你的第一個回答開始，一次只問一個問題。</p>
+      </div>
+    </section>
+
+    <footer>中文文章責編 Skill · 使用流程草稿 · v1.0.0</footer>
+  </main>
+</body>
+</html>
